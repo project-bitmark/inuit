@@ -10,7 +10,7 @@ def buildDB():
 
 	#create the tables
 	c.execute('create table inuit_versions (id integer primary key not null, version int, prefix varchar(255), length integer);')
-	c.execute('create table inuit_currencies (id integer primary key not null, currency varchar(255), longName varchar(255), version integer, foreign key(version) references inuit_versions(id));')
+	c.execute('create table inuit_currencies (id integer primary key not null, currency varchar(255), longName varchar(255), version integer, privateversion integer, foreign key(version) references inuit_versions(id));')
 	c.execute('create table inuit_privK (id integer primary key not null, privK varchar(255), currency integer, bip varchar(255), foreign key(currency) references inuit_currencies(id));')
 	c.execute('create table inuit_addresses (id integer primary key not null, address varchar(255), currency integer, foreign key(currency) references inuit_currencies(id));')
 	c.execute('create table inuit_master (id integer primary key not null, address integer, privK integer, version integer, foreign key(address) references inuit_addresses(id), foreign key(privK) references inuit_privK(id), foreign key(version) references inuit_versions(id));')

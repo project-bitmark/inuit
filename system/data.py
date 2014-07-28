@@ -10,12 +10,12 @@ def exportAlts():
 	"""
 	conn = db.open()
 	c = conn.cursor()
-	c.execute('select c.currency, c.longName, v.version from inuit_currencies as c inner join inuit_versions as v on c.version = v.id order by c.longName;')
+	c.execute('select c.currency, c.longName, v.version, c.privateversion from inuit_currencies as c inner join inuit_versions as v on c.version = v.id order by c.longName;')
 	currencies = c.fetchall()
 	db.close(conn)
 	currs = []
 	for cur in currencies:
-		currs.append({'currency': str(cur[0]), 'longName': str(cur[1]), 'version': int(cur[2])}) 
+		currs.append({'currency': str(cur[0]), 'longName': str(cur[1]), 'version': int(cur[2]), 'privateversion': int(cur[3])}) 
 	with open('currencies.json', 'w') as outfile:
 		json.dump(currs, outfile)
 	print('exported all currency data')
@@ -36,6 +36,7 @@ def importAlts():
 	c = conn.cursor()
 	for cur in currencies:
 		version = cur['version'] if cur['version'] < 145 else 145
+		privateversion = cur['privateversion'] if 'privateversion' in cur else 128+int(cur['version'])
 		c.execute('select id from inuit_versions where version=?;', (version,))
 		versionId = c.fetchone()
 		if versionId is None:
@@ -44,9 +45,9 @@ def importAlts():
 		curId = c.fetchone()
 		if curId is None:
 			#currency doesn't exist in the system so add it
-			c.execute('insert into inuit_currencies (currency, longName, version) values (?,?,?);', (cur['currency'], cur['longName'], versionId[0]))
+			c.execute('insert into inuit_currencies (currency, longName, version, privateversion) values (?,?,?,?);', (cur['currency'], cur['longName'], versionId[0], privateversion))
 		else:
-			c.execute('update inuit_currencies set currency=?, longName=?, version=? where id=?;', (cur['currency'], cur['longName'], versionId[0], curId[0]))
+			c.execute('update inuit_currencies set currency=?, longName=?, version=?, privateversion=? where id=?;', (cur['currency'], cur['longName'], versionId[0], privateversion, curId[0]))
 	db.close(conn)
 	print('import finished')
 	return True

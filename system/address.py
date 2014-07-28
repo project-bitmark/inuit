@@ -9,11 +9,11 @@ import num.rand as rand
 import system.db as db
 import random
 
-def privateKey2Wif(privateKey, version=0, prefix=1, length=0):
+def privateKey2Wif(privateKey, version=0, prefix=1, length=0, privateversion=0):
 	"""
 	convert a private key to WIF format
 	"""
-	return base58Encode(enc.encode(privateKey, 256, 32) + '\x01', (128+int(version)), prefix, length)
+	return base58Encode(enc.encode(privateKey, 256, 32) + '\x01', int(privateversion), prefix, length)
 
 
 def privateKey2PublicKey(priv):
@@ -51,7 +51,7 @@ def generate(cur, bip=False):
 	conn = db.open()
 	c = conn.cursor()
 	#pull the version details from the database
-	c.execute('select v.version,v.prefix,v.length,c.id,c.longName,c.version from inuit_versions as v inner join inuit_currencies as c on c.version = v.id where c.currency=?;', (cur.upper(),))
+	c.execute('select v.version,v.prefix,v.length,c.id,c.longName,c.version,c.privateversion from inuit_versions as v inner join inuit_currencies as c on c.version = v.id where c.currency=?;', (cur.upper(),))
 	version = c.fetchone()
 	if version is None:
 		print(cur.upper() + ' is not currently listed as a currency')
@@ -110,7 +110,7 @@ def dumpPrivKey(address):
 	conn = db.open()
 	c = conn.cursor()
 	#get the needed data from the database
-	c.execute('select p.id,p.privK,v.version,v.prefix,v.length,c.longName from inuit_privK as p inner join inuit_master as m on p.id = m.privK inner join inuit_addresses as a on a.id = m.address inner join inuit_currencies as c on p.currency = c.id inner join inuit_versions as v on c.version = v.id where a.address=?;', (address.encode('base64', 'strict'),))
+	c.execute('select p.id,p.privK,v.version,v.prefix,v.length,c.longName,c.privateversion from inuit_privK as p inner join inuit_master as m on p.id = m.privK inner join inuit_addresses as a on a.id = m.address inner join inuit_currencies as c on p.currency = c.id inner join inuit_versions as v on c.version = v.id where a.address=?;', (address.encode('base64', 'strict'),))
 	privData = c.fetchone()
 	if privData is None:
 		print(address + ' was not found')
@@ -156,5 +156,5 @@ def dumpPrivKey(address):
 	print('\n' + privData[5] + ' Address = ' + str(address))			
 	print('\nPrivate key : ')
 	print('HEX : ' + enc.encode(privK, 16))
-	print('WIF : ' + privateKey2Wif(privK, privData[2], privData[3], privData[4]))
+	print('WIF : ' + privateKey2Wif(privK, privData[2], privData[3], privData[4], privData[6]))
 	return True
