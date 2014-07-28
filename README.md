@@ -1,6 +1,8 @@
 inuit
 ======
 
+**Modified inuit with the ability to specify the private key version, and Bitmark Support**
+
 I have a modest and mixed portfolio of crypto-currencies which I wanted to take off-line and put into cold storage. I found that to do this I would have to generate paper wallets for each currency using a different paper wallet generator each time.
 What I really wanted was a single application that could generate addresses and private keys for multiple currencies so that I could install it on a Raspberry Pi or Linux Live USB stick. This would allow me to cold store all my currencies in one place and with a small amount of effort.
 
